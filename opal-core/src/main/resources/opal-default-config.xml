@@ -1,0 +1,47 @@
+<!--
+  ~ Copyright (c) 2021 OBiBa. All rights reserved.
+  ~
+  ~ This program and the accompanying materials
+  ~ are made available under the terms of the GNU Public License v3.0.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<org.obiba.opal.core.cfg.OpalConfiguration>
+
+  <secretKey/>
+
+  <databasePassword/>
+
+  <fileSystemRoot>file://${OPAL_HOME}/fs</fileSystemRoot>
+
+  <magmaEngineFactory>
+
+    <extensions>
+      <org.obiba.magma.js.MagmaJsExtension/>
+      <org.obiba.magma.xstream.MagmaXStreamExtension/>
+      <org.obiba.magma.security.MagmaSecurityExtension/>
+    </extensions>
+
+    <factories/>
+
+  </magmaEngineFactory>
+
+  <extensions>
+    <org.obiba.opal.datashield.cfg.DatashieldConfiguration>
+      <level>RESTRICTED</level>
+      <environments>
+        <org.obiba.opal.datashield.DataShieldEnvironment>
+          <environment>ASSIGN</environment>
+          <methods/>
+        </org.obiba.opal.datashield.DataShieldEnvironment>
+        <org.obiba.opal.datashield.DataShieldEnvironment>
+          <environment>AGGREGATE</environment>
+          <methods/>
+        </org.obiba.opal.datashield.DataShieldEnvironment>
+      </environments>
+    </org.obiba.opal.datashield.cfg.DatashieldConfiguration>
+  </extensions>
+
+</org.obiba.opal.core.cfg.OpalConfiguration>

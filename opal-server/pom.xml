@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2021 OBiBa. All rights reserved.
+  ~
+  ~ This program and the accompanying materials
+  ~ are made available under the terms of the GNU Public License v3.0.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses />.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>opal</artifactId>
+    <groupId>org.obiba.opal</groupId>
+    <version>5.1.0</version>
+  </parent>
+  <artifactId>opal-server</artifactId>
+  <name>opal-server</name>
+
+  <properties>
+    <install.dir>/usr/share</install.dir>
+    <opal.dir>${install.dir}/opal-server-${project.version}</opal.dir>
+    <package.name>opal-server-${project.version}</package.name>
+    <dist.location>${basedir}/target/${package.name}-dist/${package.name}</dist.location>
+    <deb.dir>${basedir}/target/deb</deb.dir>
+    <deb.version>${project.version}</deb.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>commons-daemon</groupId>
+      <artifactId>commons-daemon</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.obiba.opal</groupId>
+      <artifactId>opal-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.obiba.opal</groupId>
+      <artifactId>opal-shell</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.obiba.opal</groupId>
+      <artifactId>opal-search</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.obiba.opal</groupId>
+      <artifactId>opal-r</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.obiba.opal</groupId>
+      <artifactId>opal-datashield</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.obiba.opal</groupId>
+      <artifactId>opal-httpd</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.obiba.opal</groupId>
+      <artifactId>opal-core-ws</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.obiba.opal</groupId>
+      <artifactId>opal-upgrade</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib-nodep</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>net.logstash.logback</groupId>
+      <artifactId>logstash-logback-encoder</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.shiro.tools</groupId>
+      <artifactId>shiro-tools-hasher</artifactId>
+      <classifier>cli</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.obiba.commons</groupId>
+      <artifactId>obiba-password-hasher</artifactId>
+      <classifier>cli</classifier>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/opal-server.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Disable default deployer. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <!-- A profile for the builds performed by the continuous integration server -->
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>rpm-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>make-rpm</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>attached-rpm</goal>
+                </goals>
+                <configuration>
+                  <name>opal-server</name>
+                  <needarch>noarch</needarch>
+                  <version>${project.version}</version>
+                  <license>see /usr/share/doc/opal/copyright</license>
+                  <group>Applications/Engineering</group>
+                  <packager>OBiBa</packager>
+                  <prefix>/usr/share</prefix>
+                  <changelogFile>/usr/share/changelog</changelogFile>
+                  <targetOS>Linux</targetOS>
+                  <requires>
+                    <require>unzip</require>
+                  </requires>
+                  <mappings>
+                    <mapping>
+                      <directory>/usr/lib/systemd/system</directory>
+                      <filemode>644</filemode>
+                      <directoryIncluded>false</directoryIncluded>
+                      <sources>
+                        <source>
+                          <location>src/main/rpm/opal.service</location>
+                        </source>
+                      </sources>
+                    </mapping>
+                    <mapping>
+                      <directory>${opal.dir}/bin</directory>
+                      <filemode>755</filemode>
+                      <sources>
+                        <source>
+                          <location>src/main/rpm/start.sh</location>
+                        </source>
+                        <source>
+                          <location>src/main/rpm/update.sh</location>
+                        </source>
+                      </sources>
+                    </mapping>
+                    <mapping>
+                      <directory>${opal.dir}/tools</directory>
+                      <filemode>755</filemode>
+                      <sources>
+                        <source>
+                          <location>${dist.location}/tools</location>
+                          <excludes>
+                            <exclude>*.bat</exclude>
+                          </excludes>
+                        </source>
+                      </sources>
+                    </mapping>
+                    <mapping>
+                      <directory>/etc/opal</directory>
+                      <filemode>640</filemode>
+                      <username>opal</username>
+                      <groupname>adm</groupname>
+                      <configuration>noreplace</configuration>
+                      <sources>
+                        <source>
+                          <location>${dist.location}/conf</location>
+                        </source>
+                      </sources>
+                    </mapping>
+                    <mapping>
+                      <directory>/etc/default</directory>
+                      <filemode>644</filemode>
+                      <directoryIncluded>false</directoryIncluded>
+                      <configuration>noreplace</configuration>
+                      <sources>
+                        <source>
+                          <location>src/main/rpm/opal.default</location>
+                          <destination>opal</destination>
+                          <filter>true</filter>
+                        </source>
+                      </sources>
+                    </mapping>
+                    <mapping>
+                      <directory>${opal.dir}/lib</directory>
+                      <filemode>755</filemode>
+                      <sources>
+                        <source>
+                          <location>${dist.location}/lib</location>
+                        </source>
+                      </sources>
+                    </mapping>
+                    <mapping>
+                      <directory>${opal.dir}/tools/hasher/lib</directory>
+                      <filemode>755</filemode>
+                      <sources>
+                        <source>
+                          <location>${dist.location}/tools/hasher/lib</location>
+                        </source>
+                      </sources>
+                    </mapping>
+                    <mapping>
+                      <directory>${opal.dir}/webapp</directory>
+                      <sources>
+                        <source>
+                          <location>${dist.location}/webapp</location>
+                        </source>
+                      </sources>
+                    </mapping>
+                    <mapping>
+                      <directory>/usr/share/doc/opal</directory>
+                      <filemode>755</filemode>
+                      <username>opal</username>
+                      <groupname>adm</groupname>
+                      <documentation>true</documentation>
+                      <sources>
+                        <source>
+                          <location>src/main/deb/debian/changelog</location>
+                        </source>
+                        <source>
+                          <location>src/main/rpm/copyright</location>
+                        </source>
+                      </sources>
+                    </mapping>
+                    <mapping>
+                      <directory>/var/lib/opal</directory>
+                      <filemode>740</filemode>
+                      <username>opal</username>
+                      <groupname>adm</groupname>
+                    </mapping>
+                    <mapping>
+                      <directory>/var/log/opal</directory>
+                      <filemode>740</filemode>
+                      <username>opal</username>
+                      <groupname>adm</groupname>
+                    </mapping>
+                  </mappings>
+                  <preinstallScriptlet>
+                    <scriptFile>src/main/rpm/scripts/preinstall.sh</scriptFile>
+                    <fileEncoding>utf-8</fileEncoding>
+                  </preinstallScriptlet>
+                  <postinstallScriptlet>
+                    <scriptFile>src/main/rpm/scripts/postinstall.sh</scriptFile>
+                    <fileEncoding>utf-8</fileEncoding>
+                  </postinstallScriptlet>
+                  <pretransScriptlet>
+                    <scriptFile>src/main/rpm/scripts/pretrans.sh</scriptFile>
+                    <fileEncoding>utf-8</fileEncoding>
+                  </pretransScriptlet>
+                  <posttransScriptlet>
+                    <scriptFile>src/main/rpm/scripts/posttrans.sh</scriptFile>
+                    <fileEncoding>utf-8</fileEncoding>
+                  </posttransScriptlet>
+                  <preremoveScriptlet>
+                    <scriptFile>src/main/rpm/scripts/prerm.sh</scriptFile>
+                    <fileEncoding>utf-8</fileEncoding>
+                  </preremoveScriptlet>
+                  <postremoveScriptlet>
+                    <scriptFile>src/main/rpm/scripts/postrm.sh</scriptFile>
+                    <fileEncoding>utf-8</fileEncoding>
+                  </postremoveScriptlet>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>make-deb</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <tstamp>
+                      <format property="deb.date" pattern="EEE, d MMM yyyy HH:mm:ss Z" locale="en" />
+                    </tstamp>
+
+                    <mkdir dir="${deb.dir}" />
+                    <copy todir="${deb.dir}">
+                      <fileset dir="src/main/deb" />
+                      <filterset>
+                        <filter token="project.version" value="${deb.version}" />
+                        <filter token="date" value="${deb.date}" />
+                      </filterset>
+                    </copy>
+
+                    <copy todir="${deb.dir}/usr/lib/systemd/system" file="src/main/deb/systemd/opal.service" />
+                    <copy todir="${deb.dir}/etc/default" file="src/main/deb/default/opal" />
+
+                    <mkdir dir="${deb.dir}/usr/share" />
+                    <unzip src="${basedir}/target/opal-server-${project.version}-dist.zip" dest="${deb.dir}/usr/share" />
+                    <delete dir="${deb.dir}/usr/share/opal-server-${project.version}/bin" />
+                    <copy todir="${deb.dir}/usr/share/opal-server-${project.version}/bin" file="src/main/deb/systemd/start.sh" />
+                    <chmod file="${deb.dir}/usr/share/opal-server-${project.version}/bin/start.sh" perm="+x" />
+
+                    <mkdir dir="${deb.dir}/etc" />
+                    <copy todir="${deb.dir}/etc/opal">
+                      <fileset dir="${deb.dir}/usr/share/opal-server-${project.version}/conf" />
+                    </copy>
+
+                    <exec executable="debuild" dir="${deb.dir}" failonerror="true" osfamily="unix">
+                      <arg value="-b" />
+                      <arg value="-i" />
+                      <arg value="-us" />
+                      <arg value="-uc" />
+                    </exec>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>de.jutzig</groupId>
+            <artifactId>github-release-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>make-release</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>release</goal>
+                </goals>
+                <configuration>
+                  <releaseName>${project.version}</releaseName>
+                  <tag>${project.version}</tag>
+                  <repositoryId>obiba/opal</repositoryId>
+                  <artifact>donotuploadjar</artifact>
+                  <fileSets>
+                    <fileSet>
+                      <directory>${basedir}/target</directory>
+                      <includes>
+                        <include>*.zip</include>
+                        <include>*.deb</include>
+                      </includes>
+                    </fileSet>
+                    <fileSet>
+                      <directory>${basedir}/target/rpm/opal-server/RPMS/noarch</directory>
+                      <includes>
+                        <include>*.rpm</include>
+                      </includes>
+                    </fileSet>
+                  </fileSets>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

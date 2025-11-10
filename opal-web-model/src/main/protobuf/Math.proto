@@ -1,0 +1,114 @@
+syntax = "proto2";
+
+package Math;
+
+option java_package = "org.obiba.opal.web.model";
+
+message SummaryStatisticsDto {
+  required string resource = 1;
+  optional int32 limit = 2;
+  extensions 1000 to max;
+}
+
+message CategoricalSummaryDto {
+
+  required string mode = 1;
+  required int64 n = 2;
+  repeated FrequencyDto frequencies = 3;
+  optional int64 otherFrequency = 4;
+
+  extend SummaryStatisticsDto {
+    optional CategoricalSummaryDto categorical = 1000;
+  }
+}
+
+message ContinuousSummaryDto {
+
+  required DescriptiveStatsDto summary = 1;
+  repeated double distributionPercentiles = 2;
+  repeated IntervalFrequencyDto intervalFrequency = 3;
+  repeated FrequencyDto frequencies = 4;
+
+  extend SummaryStatisticsDto {
+    optional ContinuousSummaryDto continuous = 1001;
+  }
+}
+
+message DefaultSummaryDto {
+
+  required int64 n = 2;
+  repeated FrequencyDto frequencies = 3;
+
+  extend SummaryStatisticsDto {
+    optional DefaultSummaryDto defaultSummary = 1002;
+  }
+}
+
+message BinarySummaryDto {
+
+  required int64 n = 2;
+  repeated FrequencyDto frequencies = 3;
+
+  extend SummaryStatisticsDto {
+    optional BinarySummaryDto binarySummary = 1003;
+  }
+}
+
+message TextSummaryDto {
+
+  required int64 n = 2;
+  repeated FrequencyDto frequencies = 3;
+  optional int64 otherFrequency = 4;
+
+  extend SummaryStatisticsDto {
+    optional TextSummaryDto textSummary = 1004;
+  }
+}
+
+message GeoSummaryDto {
+  required int64 n = 2;
+  repeated FrequencyDto frequencies = 3;
+  repeated PointDto points = 4;
+
+  extend SummaryStatisticsDto {
+    optional GeoSummaryDto geoSummary = 1005;
+  }
+}
+
+message PointDto {
+  required double lat = 1;
+  required double lon = 2;
+}
+
+message FrequencyDto {
+  required string value = 1;
+  required int64 freq = 2;
+  required double pct = 3;
+  required bool missing = 4;
+  optional int64 cummFreq = 5;
+  optional double cummPct = 6;
+}
+
+message IntervalFrequencyDto {
+  required double lower = 1;
+  required double upper = 2;
+  required int64 freq = 3;
+  required double density = 4;
+}
+
+message DescriptiveStatsDto {
+  optional double min = 1;
+  optional double max = 2;
+  optional double mean = 3;
+  optional double geometricMean = 4;
+  optional int64 n = 5;
+  optional double sum = 6;
+  optional double sumsq = 7;
+  optional double stdDev = 8;
+  optional double variance = 9;
+  repeated double percentiles = 10;
+  optional double skewness = 11;
+  optional double kurtosis = 12;
+  optional double median = 13;
+  repeated double values = 14;
+}

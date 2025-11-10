@@ -1,0 +1,97 @@
+syntax = "proto2";
+
+package Plugins;
+
+option java_package = "org.obiba.opal.web.model";
+
+message PluginPackageDto {
+    required string name = 1;
+    required string title = 2;
+    required string description = 3;
+    required string author = 4;
+    required string maintainer = 5;
+    required string license = 6;
+    optional string website = 7;
+    required string version = 8;
+    required string opalVersion = 9;
+    required string type = 10;
+    optional string file = 11;
+    optional bool uninstalled = 12;
+    extensions 1000 to max;
+}
+
+message PluginPackagesDto {
+    required string site = 1;
+    optional string updated = 2;
+    required bool restart = 3;
+    repeated PluginPackageDto packages = 4;
+}
+
+message DatasourcePluginPackageDto {
+    repeated string usages = 1;
+    required string group = 2;
+    extend PluginPackageDto {
+        optional DatasourcePluginPackageDto datasource = 1000;
+    }
+}
+
+message AnalysisPluginPackageDto {
+    repeated AnalysisPluginTemplateDto analysisTemplates = 1;
+
+    extend PluginPackageDto {
+        optional AnalysisPluginPackageDto analysis = 2000;
+    }
+}
+
+message AnalysisPluginTemplateDto {
+    required string name = 1;
+    required string title = 2;
+    optional string description = 3;
+    required string schemaForm = 4;
+    repeated string valueTypes = 5;
+
+    optional string reportPath = 6;
+    optional string routinePath = 7;
+}
+
+message PluginDto {
+    required string name = 1;
+    required string title = 2;
+    required string description = 3;
+    required string author = 4;
+    required string maintainer = 5;
+    required string license = 6;
+    optional string website = 7;
+    required string version = 8;
+    required string opalVersion = 9;
+    required string type = 10;
+    required string siteProperties = 11;
+}
+
+message VCFStoreDto {
+    required string name = 1;
+    repeated string vcf = 2; // VCF file names
+    required int32 totalSamplesCount = 3;
+    optional int32 identifiedSamplesCount = 4;
+    optional int32 controlSamplesCount = 5;
+    optional int32 participantsCount = 6;
+}
+
+message VCFSummaryDto {
+    required string name = 1; // VCF file name
+    required string format = 2; // VCF/BCF
+    required int64 size = 3; // VCF file size
+    required int32 totalSamplesCount = 4;
+    optional int32 identifiedSamplesCount = 5;
+    optional int32 controlSamplesCount = 6;
+    optional int32 participantsCount = 7;
+    required int32 variantsCount = 8;
+    required int64 genotypesCount = 9;
+}
+
+message VCFSamplesMappingDto {
+    required string projectName = 1;
+    required string tableReference = 2;
+    required string participantIdVariable = 3;
+    required string sampleRoleVariable = 4;
+}

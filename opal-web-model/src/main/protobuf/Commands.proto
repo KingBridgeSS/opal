@@ -1,0 +1,137 @@
+syntax = "proto2";
+
+import "Identifiers.proto";
+
+package Opal;
+
+option java_package = "org.obiba.opal.web.model";
+
+message Message {
+  required string msg = 1;
+  required int64 timestamp = 2;
+}
+
+message CommandStateDto {
+  enum Status {
+    NOT_STARTED = 0;
+    IN_PROGRESS = 1;
+    SUCCEEDED = 2;
+    FAILED = 3;
+    CANCEL_PENDING = 4;
+    CANCELED = 5;
+  }
+
+  message ProgressDto {
+    required string message = 1;
+    required uint32 current = 2;
+    required uint32 end = 3;
+    required uint32 percent = 4;
+  }
+
+  required uint32 id = 1;
+  required string command = 2;
+  required string commandArgs = 3;
+  required string owner = 4;
+  required string status = 5;
+  optional string startTime = 6;
+  optional string endTime = 7;
+  repeated Message messages = 8;
+  optional string project = 9;
+  required string name = 10;
+  optional ProgressDto progress = 11;
+}
+
+message ImportCommandOptionsDto {
+  optional string destination = 2;
+  optional string archive = 3;
+  repeated string files = 4;
+  optional string source = 5;
+  repeated string tables = 7;
+  optional bool incremental = 9 [default = false];
+  optional Identifiers.IdentifiersMappingConfigDto idConfig = 10;
+}
+
+message CopyCommandOptionsDto {
+  optional string source = 1;
+  required string destination = 2;
+  optional bool nonIncremental = 3;
+  optional bool noValues = 4;
+  optional bool noVariables = 5;
+  repeated string tables = 6;
+  optional bool copyNullValues = 7;
+  optional string destinationTableName = 8;
+  optional string query = 9;
+}
+
+message ExportCommandOptionsDto {
+  optional string source = 1;
+  optional string destination = 2;
+  optional string out = 3;
+  optional bool nonIncremental = 4;
+  optional bool noValues = 5;
+  optional bool noVariables = 6;
+  repeated string tables = 7;
+  optional string format = 8;
+  optional bool copyNullValues = 9 [default = true];
+  optional string destinationTableName = 10;
+  optional Identifiers.IdentifiersMappingConfigDto idConfig = 11;
+  optional string query = 12;
+  optional bool multilines = 13 [default = true];
+  optional string entityIdNames = 14;
+}
+
+message ImportVCFCommandOptionsDto {
+  required string project = 1; // store location
+  repeated string files = 2; // VCF files location
+}
+
+message ExportVCFCommandOptionsDto {
+  repeated string names = 1; // VCF file names
+  required string project = 2; // store location
+  required string destination = 3; // Destination folder
+  optional string table = 4; // table reference to be used for sample subseting
+  optional bool caseControl = 5 [default = true];
+  optional string participantIdentifiersMapping = 6;
+}
+
+message AnalyseCommandOptionsDto {
+
+  message AnalyseDto {
+    required string table = 1;
+    required string name = 2;
+    required string plugin = 3;
+    required string template = 4;
+    required string params = 5;
+    optional string variables = 6;
+  }
+
+  required string project = 1;
+  repeated AnalyseDto analyses = 2;
+}
+
+message ReloadDatasourceCommandOptionsDto {
+  required string project = 1;
+}
+
+message BackupCommandOptionsDto {
+  required string archive = 1;
+  optional bool override = 2 [default = false];
+  optional bool viewsAsTables = 3 [default = false]; // backup as a view (logical) or a table (data dump)
+}
+
+message RestoreCommandOptionsDto {
+  required string archive = 1;
+  optional string password = 2;
+  optional bool override = 3 [default = false];
+}
+
+message RPackagesCommandOptionsDto {
+  required string cluster = 1;
+}
+
+message RPackageCommandOptionsDto {
+  required string cluster = 1;
+  required string name = 2;
+  required string manager = 3;
+  optional string ref = 4;
+}

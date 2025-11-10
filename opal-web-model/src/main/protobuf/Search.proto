@@ -1,0 +1,161 @@
+syntax = "proto2";
+
+import "Opal.proto";
+import "Magma.proto";
+
+package Search;
+
+option java_package = "org.obiba.opal.web.model";
+
+message QueryTermsDto {
+  repeated QueryTermDto queries = 1;
+}
+
+message QueryTermDto {
+  optional bool global = 1;
+  optional string facet = 2; // name of the facet, if not provided no facet is returned for this term
+
+  extensions 1000 to max;
+}
+
+message VariableTermDto {
+  enum AggType {
+    MISSING = 0;
+    CARDINALITY = 1;
+    TERMS = 2;
+    STATS = 3;
+    PERCENTILES = 4;
+  }
+  required string variable = 1;
+  optional AggType type = 2; // when not specified: make the aggregation according to the variable nature
+
+  extend QueryTermDto {
+    optional VariableTermDto field = 1001;
+  }
+}
+
+message FilterDto {
+  required string variable = 1;
+  optional bool not = 2;
+
+  extend LogicalTermDto {
+    repeated FilterDto filters = 1001;
+  }
+
+  extensions 1000 to max;
+}
+
+enum TermOperator {
+  AND_OP = 0;
+  OR_OP = 1;
+}
+
+message LogicalTermDto {
+  required TermOperator operator = 1 [default = AND_OP];
+
+  extend QueryTermDto {
+    optional LogicalTermDto filter = 3000;
+    optional LogicalTermDto facetFilter = 3001;
+  }
+
+  extensions 1000 to max;
+}
+
+message InTermDto {
+  repeated string values = 1;
+  optional int32 minimumMatch = 2 [default = 1];
+
+  extend FilterDto {
+    optional InTermDto terms = 1000;
+  }
+}
+
+// do we need specialized ranges depending on the value type ?
+message RangeTermDto {
+  optional string from = 1;
+  optional string to = 2;
+  optional bool includeLower = 3 [default = true];
+  optional bool includeUpper = 4 [default = false];
+
+  extend FilterDto {
+    optional RangeTermDto range = 1001;
+  }
+}
+
+message QueryResultDto {
+  repeated FacetResultDto facets = 1;
+  required int32 totalHits = 2;
+  repeated ItemResultDto hits = 3;
+  optional string lastDoc = 4;
+}
+
+message QueryCountDto {
+  required int32 totalHits = 1 [default = 0];
+}
+
+message FacetResultDto {
+  message FilterResultDto {
+    required int32 count = 1;
+  }
+
+  message TermFrequencyResultDto {
+    required string term = 1;
+    required int32 count = 2;
+  }
+
+  message ValueResultDto {
+    optional string key = 1;
+    optional int32 count = 2;
+    optional float value = 3;
+  }
+
+  message StatisticalResultDto {
+    required int64 count = 1 [default = 0];
+    optional float total = 2; // total is the sum
+    optional float min = 3;
+    optional float max = 4;
+    optional float mean = 5;
+    optional float sumOfSquares = 6;
+    optional float variance = 7;
+    optional float stdDeviation = 8;
+  }
+
+  required string facet = 1;
+
+  repeated TermFrequencyResultDto frequencies = 2;
+  optional StatisticalResultDto statistics = 3;
+  repeated FilterResultDto filters = 4;
+  repeated ValueResultDto values = 5;
+}
+
+message ItemResultDto {
+  required string identifier = 1;
+  extensions 1000 to max;
+}
+
+message ItemFieldsDto {
+  repeated Opal.EntryDto fields = 1; // key is the field name, value is the field value for the item
+  extend ItemResultDto {
+    optional ItemFieldsDto item = 1000;
+  }
+}
+
+message VariableItemDto {
+  required Magma.VariableDto variable = 1;
+  extend ItemResultDto {
+    optional VariableItemDto item = 1001;
+  }
+}
+
+message ValueSetsResultDto {
+  required int32 totalHits = 1;
+  optional Magma.ValueSetsDto valueSets = 2;
+}
+
+message EntitiesResultDto {
+  required string entityType = 1;
+  required int32 totalHits = 2;
+  required string query = 3;
+  repeated ItemResultDto hits = 4;
+  repeated EntitiesResultDto partialResults = 5;
+}

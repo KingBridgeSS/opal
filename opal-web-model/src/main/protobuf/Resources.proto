@@ -1,0 +1,40 @@
+syntax = "proto2";
+
+package Resources;
+
+option java_package = "org.obiba.opal.web.model";
+
+message ResourceProvidersStatusDto {
+    required int32 providersCount = 1;
+    required bool rServerRunning = 2;
+}
+
+message ResourceProvidersDto {
+    repeated ResourceProviderDto providers = 1;
+    repeated ResourceCategoryDto categories = 2;
+}
+
+message ResourceProviderDto {
+    required string name = 1;
+    required string title = 2;
+    optional string web = 3;
+    optional string description = 4;
+    repeated ResourceCategoryDto categories = 5;
+    repeated ResourceFactoryDto resourceFactories = 6;
+}
+
+message ResourceCategoryDto {
+    required string name = 1;
+    required string title = 2;
+    optional string description = 3;
+}
+
+message ResourceFactoryDto {
+    required string provider = 1;
+    required string name = 2;
+    required string title = 3;
+    optional string description = 4;
+    repeated string tags = 5;
+    required string parametersSchemaForm = 6;
+    required string credentialsSchemaForm = 7;
+}

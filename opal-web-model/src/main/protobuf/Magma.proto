@@ -1,0 +1,420 @@
+syntax = "proto2";
+
+import "Ws.proto";
+import "Identifiers.proto";
+
+package Magma;
+
+option java_package = "org.obiba.opal.web.model";
+
+message DatasourceIncrementalConfigDto {
+  optional bool incremental = 1 [default = false];
+  optional string incrementalDestinationName = 2;
+}
+
+message DatasourceBatchConfigDto {
+  required int32 limit = 1;
+}
+
+message DatasourceFactoryDto {
+  optional string name = 1;
+  optional DatasourceIncrementalConfigDto incrementalConfig = 2;
+  optional DatasourceBatchConfigDto batchConfig = 4;
+  optional Identifiers.IdentifiersMappingConfigDto idConfig = 5;
+  extensions 1000 to max;
+}
+
+message ExcelDatasourceFactoryDto {
+  required string file = 1;
+  optional bool readOnly = 2;
+  extend DatasourceFactoryDto {
+    optional ExcelDatasourceFactoryDto params = 1000;
+  }
+}
+
+message CsvDatasourceFactoryDto {
+  optional string bundle = 1;
+  repeated CsvDatasourceTableBundleDto tables = 2;
+  optional string characterSet = 3;
+  optional string separator = 4;
+  optional string quote = 5;
+  optional int32 firstRow = 6;
+  optional bool multilines = 7;
+  optional string defaultValueType = 8;
+  extend DatasourceFactoryDto {
+    optional CsvDatasourceFactoryDto params = 1001;
+  }
+}
+
+message CsvDatasourceTableBundleDto {
+  required string name = 1;
+  optional string variables = 2;
+  optional string data = 3;
+  optional string refTable = 4;
+  optional string entityType = 5;
+}
+
+message FsDatasourceFactoryDto {
+  required string file = 1;
+  optional bool onyxWrapper = 3 [default = true]; // required to read correctly old onyx versions are until 1.6 included
+  extend DatasourceFactoryDto {
+    optional FsDatasourceFactoryDto params = 1002;
+  }
+}
+
+message JdbcDatasourceFactoryDto {
+  required string database = 1;
+  extend DatasourceFactoryDto {
+    optional JdbcDatasourceFactoryDto params = 1003;
+  }
+}
+
+message JdbcDatasourceSettingsDto {
+  required string defaultEntityType = 1;
+  required bool useMetadataTables = 2;
+  repeated string mappedTables = 3;
+  repeated JdbcValueTableSettingsDto tableSettings = 4;
+  optional string defaultCreatedTimestampColumnName = 5;
+  optional string defaultUpdatedTimestampColumnName = 6;
+  optional string defaultEntityIdColumnName = 7;
+  optional bool multipleDatasources = 8;
+  optional int32 batchSize = 9;
+  optional bool multilines = 10 [default = false];
+  repeated JdbcValueTableSettingsFactoryDto tableSettingsFactories = 11;
+}
+
+message JdbcValueTableSettingsDto {
+  required string sqlTable = 1;
+  optional string opalTable = 2;
+  required string entityType = 3;
+  optional string entityIdentifierColumn = 4;
+  optional string createdTimestampColumn = 5;
+  optional string updatedTimestampColumn = 6;
+  optional string entityIdentifiersWhere = 7;
+  optional string excludedColumns = 8;
+  optional string includedColumns = 9;
+  optional bool multilines = 10 [default = false];
+}
+
+message JdbcValueTableSettingsFactoryDto {
+  required string sqlTable = 1;
+  optional string opalTable = 2;
+  required string entityType = 3;
+  optional string entityIdentifierColumn = 4;
+  optional string createdTimestampColumn = 5;
+  optional string updatedTimestampColumn = 6;
+  optional string entityIdentifiersWhere = 7;
+  required string tablePartitionColumn = 8;
+  optional string excludedColumns = 9;
+  optional string includedColumns = 10;
+  optional bool multilines = 11 [default = false];
+}
+
+message HibernateDatasourceFactoryDto {
+  optional bool key = 1;
+  optional string database = 2;
+  extend DatasourceFactoryDto {
+    optional HibernateDatasourceFactoryDto params = 1004;
+  }
+}
+
+message StaticDatasourceFactoryDto {
+  repeated TableDto tables = 1;
+  repeated ViewDto views = 2;
+  extend DatasourceFactoryDto {
+    optional StaticDatasourceFactoryDto params = 1006;
+  }
+}
+
+message RestDatasourceFactoryDto {
+  required string url = 1;
+  optional string username = 2;
+  optional string password = 3;
+  optional string token = 5;
+  required string remoteDatasource = 4;
+  extend DatasourceFactoryDto {
+    optional RestDatasourceFactoryDto params = 1007;
+  }
+}
+
+message IncrementalDatasourceFactoryDto {
+  required DatasourceFactoryDto datasourceFactoryDto = 1;
+  required bool isIncremental = 2 [default = true];
+  required TableDto destinationTable = 3;
+  extend DatasourceFactoryDto {
+    optional IncrementalDatasourceFactoryDto params = 1008;
+  }
+}
+
+message SpssDatasourceFactoryDto {
+  required string file = 1;
+  optional string characterSet = 2;
+  optional string entityType = 3;
+  optional string locale = 4;
+  optional string idVariable = 5;
+  extend DatasourceFactoryDto {
+    optional SpssDatasourceFactoryDto params = 1009;
+  }
+}
+
+message HCDatasourceFactoryDto {
+  extend DatasourceFactoryDto {
+    optional HCDatasourceFactoryDto params = 1010;
+  }
+}
+
+message GNPostalCodesDatasourceFactoryDto {
+  extend DatasourceFactoryDto {
+    optional GNPostalCodesDatasourceFactoryDto params = 1011;
+  }
+}
+
+message MongoDBDatasourceFactoryDto {
+  optional string database = 1;
+  extend DatasourceFactoryDto {
+    optional MongoDBDatasourceFactoryDto params = 1012;
+  }
+}
+
+message RSessionDatasourceFactoryDto {
+  required string session = 1;
+  required string symbol = 2;
+  optional string entityType = 3;
+  optional string idColumn = 4;
+  extend DatasourceFactoryDto {
+    optional RSessionDatasourceFactoryDto params = 1013;
+  }
+}
+
+message RHavenDatasourceFactoryDto {
+  required string file = 1;
+  required string symbol = 2;
+  optional string entityType = 3;
+  optional string idColumn = 4;
+  optional string catFile = 5;
+  optional string locale = 6;
+  extend DatasourceFactoryDto {
+    optional RHavenDatasourceFactoryDto params = 1014;
+  }
+}
+
+message PluginDatasourceFactoryDto {
+  required string name = 1; // plugin name
+  optional string parameters = 2; // user parameters
+  extend DatasourceFactoryDto {
+    optional PluginDatasourceFactoryDto params = 1015;
+  }
+}
+
+message DatasourceParsingErrorDto {
+  required string defaultMessage = 1;
+  required string key = 2;
+  repeated string arguments = 3;
+  extend Ws.ClientErrorDto {
+    repeated DatasourceParsingErrorDto errors = 1000;
+  }
+}
+
+message DatasourceDto {
+  required string name = 1;
+  optional string link = 2;
+  repeated string table = 3;
+  repeated string view = 4;
+  required string type = 5;
+  optional TimestampsDto timestamps = 6;
+}
+
+message TableDto {
+  required string name = 1;
+  required string entityType = 2;
+  optional string link = 3;
+  optional int32 variableCount = 4;
+  optional int32 valueSetCount = 5;
+  optional string datasourceName = 6;
+  repeated VariableDto variables = 7;
+  optional string viewLink = 8;
+  optional TimestampsDto timestamps = 9;
+  optional string viewType = 10;
+  optional TableStatusDto status = 11;
+}
+
+message VariableDto {
+  required string name = 1;
+  required string entityType = 2;
+  required string valueType = 3;
+  optional string mimeType = 4;
+  required bool isRepeatable = 5;
+  optional string occurrenceGroup = 6;
+  optional string link = 7;
+  repeated AttributeDto attributes = 8;
+  repeated CategoryDto categories = 9;
+  optional string unit = 10;
+  optional LinkDto parentLink = 11;
+  optional bool isNewVariable = 12;
+  optional int32 index = 13;
+  optional string referencedEntityType = 14;
+}
+
+message CategoryDto {
+  required string name = 1;
+  required bool isMissing = 2;
+  repeated AttributeDto attributes = 3;
+}
+
+message AttributeDto {
+  required string name = 1;
+  required string value = 2;
+  optional string locale = 3;
+  optional string namespace = 4;
+}
+
+message VariableAttributeDto {
+  optional string datasource = 1;
+  optional string table = 2;
+  required string variable = 3;
+  required string name = 4;
+  optional string namespace = 5;
+  optional string locale = 6;
+  optional string value = 7; // if missing: update is a deletion
+}
+
+message ValueSetsDto {
+  message ValueSetDto {
+    required string identifier = 1;
+    repeated ValueDto values = 2;
+    optional TimestampsDto timestamps = 3;
+  }
+  message ValueDto {
+    optional string value = 1;
+    optional string link = 2; // link to the value
+    repeated ValueDto values = 3; // value sequence
+    optional int64 length = 4; // length of the value
+  }
+  repeated string variables = 1;
+  repeated ValueSetDto valueSets = 2;
+  required string entityType = 3;
+}
+
+message VariableEntityDto {
+  required string identifier = 1;
+  optional string entityType = 2;
+}
+
+message VariableEntitySummaryDto {
+  required string entityType = 1;
+  required int32 tableCount = 2;
+}
+
+message TimestampsDto {
+  optional string created = 1;
+  optional string lastUpdate = 2;
+}
+
+message LinkDto {
+  required string rel = 1;
+  required string link = 2;
+}
+
+enum TableStatusDto {
+  CLOSED = 1;
+  LOADING = 2;
+  READY = 3;
+  ERROR = 4;
+}
+
+message ViewDto {
+  repeated string from = 1;
+  optional string name = 2;
+  optional string datasourceName = 3;
+  optional string where = 4;
+  repeated string innerFrom = 5;
+  optional TableStatusDto status = 6;
+  extensions 1000 to max;
+}
+
+message JavaScriptViewDto {
+  optional string select = 1;
+  extend ViewDto {
+    optional JavaScriptViewDto view = 1000;
+  }
+}
+
+message VariableListViewDto {
+  repeated VariableDto variables = 1;
+  extend ViewDto {
+    optional VariableListViewDto view = 1001;
+  }
+}
+
+message OutlierRemovingViewDto {
+  required double stdDevMultiplier = 1;
+  optional string valueForOutlier = 2;
+  extend ViewDto {
+    optional OutlierRemovingViewDto view = 1002;
+  }
+}
+
+message FileViewDto {
+  required string filename = 1;
+  enum FileViewType {
+    SERIALIZED_XML = 0;
+    EXCEL = 1;
+  }
+  optional FileViewType type = 2 [default = SERIALIZED_XML];
+
+  extend ViewDto {
+    optional FileViewDto view = 1003;
+  }
+}
+
+message ResourceViewDto {
+  repeated VariableDto variables = 1;
+  optional string idColumn = 2;
+  optional string entityType = 3;
+  optional string profile = 4;
+  optional bool allColumns = 5 [default = true];
+  extend ViewDto {
+    optional ResourceViewDto view = 1004;
+  }
+}
+
+message JavaScriptErrorDto {
+  required string message = 1; // RhinoException.details()
+  required string sourceName = 2; // RhinoException.sourceName()
+  required int32 lineNumber = 3; // RhinoException.lineNumber()
+  optional string lineSource = 4; // RhinoException.lineSource()
+  optional int32 columnNumber = 5; // RhinoException.columnNumber()
+  extend Ws.ClientErrorDto {
+    repeated JavaScriptErrorDto errors = 1001;
+  }
+}
+
+message TableCompareDto {
+  required TableDto compared = 1;
+  optional TableDto withTable = 2; // optional because this is absent when the destination table does not exist
+  repeated VariableDto newVariables = 3; // list of all variables present in "compared" but not in "with"
+  repeated VariableDto unmodifiedVariables = 4; // list of all variables present in both and whose definitions are compatible and are not modified
+  repeated VariableDto missingVariables = 5; // list of all variables present in "with" but not in "compared"
+  repeated ConflictDto conflicts = 6; // list of all variables present in both and whose definitions are incompatible
+  repeated VariableDto modifiedVariables = 7; // list of all variables present in both and whose definitions are compatible but are modified
+}
+
+message ConflictDto {
+  required VariableDto variable = 1;
+  required string code = 2;
+  repeated string arguments = 3;
+}
+
+message DatasourceCompareDto {
+  required DatasourceDto compared = 1;
+  required DatasourceDto withDatasource = 2;
+  repeated TableCompareDto tableComparisons = 3;
+}
+
+message TableIdentifiersSync {
+  required string datasource = 1;
+  required string table = 2;
+  required string entityType = 5;
+  required int32 total = 3; // count of entities in table
+  required int32 count = 4; // count of entity identifiers to be imported
+}

@@ -1,0 +1,18 @@
+# OBiBa/Opal systemd service file
+
+[Unit]
+Description=OBiBa Opal service
+# Wait for network
+After=network-online.target
+
+[Service]
+WorkingDirectory=/var/lib/opal
+EnvironmentFile=/etc/default/opal
+User=opal
+LimitNOFILE=16384
+StandardOutput=file:/var/log/opal/stdout.log
+StandardError=file:/var/log/opal/stderr.log
+ExecStart=/usr/share/opal/bin/start.sh
+
+[Install]
+WantedBy=multi-user.target

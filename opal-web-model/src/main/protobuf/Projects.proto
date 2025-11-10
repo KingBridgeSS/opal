@@ -1,0 +1,136 @@
+syntax = "proto2";
+
+import "Magma.proto";
+
+package Projects;
+
+option java_package = "org.obiba.opal.web.model";
+
+message ProjectDto {
+  message IdentifiersMappingDto {
+    required string entityType = 1;
+    required string name = 2;
+    required string mapping = 3;
+  }
+
+  required string name = 1;
+  required string title = 2;
+  optional string description = 3;
+  optional Magma.DatasourceDto datasource = 4;
+  repeated string tags = 5;
+  optional string link = 6;
+  optional string directory = 7;
+  optional bool archived = 8 [default = false];
+  optional string database = 9;
+  optional Magma.TimestampsDto timestamps = 10;
+  optional string vcfStoreService = 11;
+  optional string exportFolder = 12;
+  repeated IdentifiersMappingDto idMappings = 13;
+  optional ProjectDatasourceStatusDto datasourceStatus = 14;
+}
+
+enum ProjectDatasourceStatusDto {
+  LOADING = 1;
+  READY = 2;
+  BUSY = 3;
+  NONE = 4;
+  ERRORS = 5;
+}
+
+message ProjectFactoryDto {
+  required string name = 1;
+  optional string title = 2;
+  optional string description = 3;
+  optional string database = 4;
+  repeated string tags = 5;
+  optional string vcfStoreService = 6;
+  optional string exportFolder = 7;
+}
+
+message ProjectSummaryDto {
+  required string name = 1;
+  required int32 tableCount = 2;
+  required int32 variableCount = 3;
+  required int32 entityCount = 4;
+  required int32 viewCount = 5;
+  required int32 derivedVariableCount = 6;
+  required int32 resourceCount = 7;
+  required ProjectDatasourceStatusDto datasourceStatus = 8;
+  optional Magma.TimestampsDto timestamps = 9;
+}
+
+message OpalAnalysisDto {
+  required string name = 1;
+
+  required string datasource = 2;
+  required string table = 3;
+
+  required string pluginName = 4;
+  required string templateName = 5;
+  required string parameters = 6;
+  repeated string variables = 7;
+
+  optional string created = 8;
+  optional string updated = 9;
+
+  repeated OpalAnalysisResultDto analysisResults = 10;
+
+  optional OpalAnalysisResultDto lastResult = 11;
+}
+
+message OpalAnalysesDto {
+  repeated OpalAnalysisDto analyses = 1;
+}
+
+message OpalAnalysisResultDto {
+  required string id = 1;
+  required string analysisName = 2;
+
+  optional string startDate = 3;
+  optional string endDate = 4;
+  repeated AnalysisResultItemDto resultItems = 5;
+
+  required AnalysisStatusDto status = 6;
+  optional string message = 7;
+
+  optional string created = 8;
+  optional string updated = 9;
+
+}
+
+message AnalysisResultItemDto {
+  required AnalysisStatusDto status = 1;
+  optional string message = 2;
+}
+
+enum AnalysisStatusDto {
+  IN_PROGRESS = 1;
+  PASSED = 2;
+  FAILED = 3;
+  ERROR = 4;
+  IGNORED = 5;
+}
+
+message OpalAnalysisResultsDto {
+  repeated OpalAnalysisResultDto analysisResults = 1;
+}
+
+message ResourceReferenceDto {
+  required string name = 1;
+  optional string description = 2;
+  required string project = 3;
+  required string provider = 4;
+  required string factory = 5;
+  required string parameters = 6;
+  optional string credentials = 7;
+  optional string created = 8;
+  optional string updated = 9;
+  optional ResourceSummaryDto resource = 10;
+  optional bool editable = 11;
+}
+
+message ResourceSummaryDto {
+  required string name = 1;
+  required string url = 2;
+  optional string format = 3;
+}

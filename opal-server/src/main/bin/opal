@@ -1,0 +1,72 @@
+#!/bin/bash
+
+if [ -z "$JAVA" ]
+then
+  # Set default JAVA
+  JAVA="java"
+  export JAVA
+fi
+
+if [ -z "$JAVA_OPTS" ]
+then
+  # Set default JAVA_OPTS
+  JAVA_OPTS="-Xms1G -Xmx2G -XX:+UseG1GC"
+  export JAVA_OPTS
+fi
+
+# The directory containing the opal shell script
+OPAL_BIN_DIR=`dirname $0`
+# resolve links - $0 may be a softlink
+OPAL_DIST=$(readlink -f $OPAL_BIN_DIR/..)
+
+export OPAL_DIST
+
+export OPAL_LOG=$OPAL_HOME/logs
+
+echo "JAVA=$JAVA"
+echo "JAVA_OPTS=$JAVA_OPTS"
+echo "OPAL_HOME=$OPAL_HOME"
+echo "OPAL_DIST=$OPAL_DIST"
+
+if [ -z "$OPAL_HOME" ]
+then
+  echo "OPAL_HOME not set."
+  exit 2;
+fi
+
+CLASSPATH="${OPAL_HOME}/conf:${OPAL_DIST}/lib/*"
+
+PLUGINS_DIR="${OPAL_HOME}/plugins/"
+[ -e "${PLUGINS_DIR}/.archive" ] || mkdir -p "${PLUGINS_DIR}/.archive"
+
+# Iterate over deprecated plugins
+find "$PLUGINS_DIR" -type d -name "opal-search-*" | grep -v ".archive" | while IFS= read -r deprecated; do
+    # Move the deprecated folder to archive folder
+    mv "$deprecated" "${PLUGINS_DIR}/.archive"
+done
+
+# Iterate over plugins zip files
+find "$PLUGINS_DIR" -type f -name "*-dist.zip" | grep -v ".archive" | while IFS= read -r zip_file; do
+    # Unzip each zip file
+    unzip -o "$zip_file" -d "${PLUGINS_DIR}"
+    # Move the zip file to archive folder
+    mv "$zip_file" "${PLUGINS_DIR}/.archive"
+done
+
+# Append plugins lib
+while IFS= read -r dir; do
+  if ! ls "$dir/../uninstall" > /dev/null 2>&1; then
+    CLASSPATH="$CLASSPATH:$dir"
+  fi
+done < <(find "${OPAL_HOME}/plugins/" -type d -name lib | grep -v ".archive")
+
+[ -e "$OPAL_HOME/logs" ] || mkdir "$OPAL_HOME/logs"
+
+JAVA_DEBUG=-agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=n
+
+#echo "CLASSPATH=$CLASSPATH"
+
+# Add $JAVA_DEBUG to this line to enable remote JVM debugging (for developers)
+APP_OPTS="${JAVA_OPTS} ${JAVA_DEBUG} -cp $CLASSPATH -DOPAL_HOME=${OPAL_HOME} -DOPAL_DIST=${OPAL_DIST} -DOPAL_LOG=${OPAL_LOG} -Dpolyglot.log.file=${OPAL_LOG}/polyglot.log -Dpolyglot.engine.WarnInterpreterOnly=false"
+$JAVA $APP_OPTS  org.obiba.opal.server.OpalServer --upgrade
+$JAVA $APP_OPTS org.obiba.opal.server.OpalServer

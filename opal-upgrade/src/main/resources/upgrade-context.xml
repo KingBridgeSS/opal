@@ -1,0 +1,147 @@
+<!--
+  ~ Copyright (c) 2021 OBiBa. All rights reserved.
+  ~
+  ~ This program and the accompanying materials
+  ~ are made available under the terms of the GNU Public License v3.0.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+  <context:component-scan base-package="org.obiba.runtime.upgrade"/>
+
+  <context:annotation-config/>
+
+  <import resource="spring/opal-core/tx.xml"/>
+  <import resource="spring/opal-core/version.xml"/>
+
+  <bean id="opalRuntime" class="org.obiba.opal.core.upgrade.support.OpalRuntimeMock"/>
+
+  <bean id="opalFileSystemService" class="org.obiba.opal.core.upgrade.support.OpalFileSystemServiceMock"/>
+
+  <bean id="eventBus" class="com.google.common.eventbus.EventBus"/>
+
+  <bean id="applicationContextProvider" class="org.obiba.opal.core.service.ApplicationContextProvider"/>
+
+  <bean id="dataSourceFactory" class="org.obiba.opal.core.runtime.jdbc.DataSourceFactory"/>
+
+  <bean id="orientDbService" class="org.obiba.opal.core.service.OrientDbServiceImpl"/>
+
+  <bean id="localOrientDbServerFactory" class="org.obiba.opal.core.service.LocalOrientDbServerFactory"/>
+
+  <bean id="databaseRegistry" class="org.obiba.opal.core.service.DefaultDatabaseRegistry"/>
+
+  <bean id="identifiersTableService" class="org.obiba.opal.core.service.DefaultIdentifiersTableService"/>
+
+  <bean id="generalConfigService" class="org.obiba.opal.core.service.OpalGeneralConfigServiceImpl"/>
+
+  <bean id="opalConfigurationIo" class="org.obiba.opal.core.cfg.DefaultOpalConfigurationIo"/>
+
+  <bean id="upgradeOpalConfigurationService" class="org.obiba.opal.core.cfg.DefaultOpalConfigurationService"/>
+
+  <bean id="opalVersionModifier" class="org.obiba.opal.core.upgrade.support.OpalVersionModifier"/>
+
+  <bean id="passwordCallbackHandler" class="org.obiba.opal.core.crypt.OpalSecretKeyPasswordCallbackHandler"/>
+
+  <bean id="subjectAclService" class="org.obiba.opal.core.service.security.SubjectAclServiceImpl"/>
+
+  <bean id="totpService" class="org.obiba.opal.core.service.security.DefaultTotpService"/>
+
+  <bean id="subjectProfileService" class="org.obiba.opal.core.service.SubjectProfileServiceImpl"/>
+  
+  <bean id="subjectCredentialsService" class="org.obiba.opal.core.service.security.SubjectCredentialsServiceImpl"/>
+
+  <bean id="credentialsKeyStoreService" class="org.obiba.opal.core.service.security.CredentialsKeyStoreServiceImpl"/>
+
+  <bean id="socketFactoryProvider" class="org.obiba.opal.core.service.security.OpalSocketFactoryProvider"/>
+
+  <bean id="systemKeyStoreService" class="org.obiba.opal.core.service.security.SystemKeyStoreServiceImpl"/>
+
+  <bean id="pluginsManager" class="org.obiba.opal.core.runtime.PluginsManager"/>
+
+  <bean id="pluginsService" class="org.obiba.opal.core.service.PluginsServiceImpl">
+    <property name="opalVersionProvider" ref="runtimeVersionProvider"/>
+  </bean>
+
+  <bean id="upgradeManager" class="org.obiba.runtime.upgrade.support.DefaultUpgradeManager">
+    <property name="currentVersionProvider" ref="opalVersionModifier"/>
+
+    <property name="runtimeVersionProvider" ref="runtimeVersionProvider"/>
+
+    <property name="newInstallationDetectionStrategy">
+      <bean class="org.obiba.runtime.upgrade.support.NullVersionNewInstallationDetectionStrategy">
+        <property name="versionProvider" ref="opalVersionModifier"/>
+      </bean>
+    </property>
+
+    <property name="installSteps">
+      <list>
+        <bean class="org.obiba.opal.core.install.SetOpalVersionInstallStep"/>
+        <bean class="org.obiba.opal.core.install.CreateOpalGeneralConfigInstallStep"/>
+        <bean class="org.obiba.opal.core.install.DefaultPluginsInstallStep"/>
+        <bean class="org.obiba.opal.core.install.DefaultPermissionsInstallStep">
+          <property name="subjectAclService" ref="subjectAclService"/>
+        </bean>
+      </list>
+    </property>
+
+    <property name="upgradeSteps">
+      <list>
+
+        <!-- 4.0.0 / R SPI -->
+        <bean class="org.obiba.opal.core.upgrade.DatasourcePluginsUpgradeStep">
+          <property name="description" value="Upgrade datasource plugins"/>
+          <property name="appliesTo" value="4.0.0"/>
+        </bean>
+        <bean class="org.obiba.opal.core.upgrade.AnalysisRPluginsUpgradeStep">
+          <property name="description" value="Upgrade R analysis plugins"/>
+          <property name="appliesTo" value="4.0.0"/>
+        </bean>
+
+        <!-- 4.5.0 -->
+        <bean class="org.obiba.opal.core.upgrade.v4_5_x.MongoDBGridFSUpgradeStep">
+          <property name="description" value="Upgrade MongoDB GridFS metadata"/>
+          <property name="appliesTo" value="4.5.0"/>
+        </bean>
+        <bean class="org.obiba.opal.core.upgrade.v4_5_x.EhCacheFolderUpgradeStep">
+          <property name="description" value="Upgrade EhCache folder"/>
+          <property name="appliesTo" value="4.5.0"/>
+        </bean>
+
+        <!-- 5.0.0 -->
+        <bean class="org.obiba.opal.core.upgrade.v5_0_x.EhCacheFolderUpgradeStep">
+          <property name="description" value="Upgrade EhCache folder"/>
+          <property name="appliesTo" value="5.0.0"/>
+        </bean>
+        <bean class="org.obiba.opal.core.upgrade.v5_0_x.ElasticSearchUpgradeStep">
+          <property name="description" value="Upgrade ES folder"/>
+          <property name="appliesTo" value="5.0.0"/>
+        </bean>
+
+      </list>
+    </property>
+
+    <property name="stepListeners">
+      <list>
+        <bean class="org.obiba.runtime.upgrade.support.LoggingUpgradeManagerListener"/>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="clearElasticSearchIndexes" class="org.obiba.opal.core.upgrade.ClearElasticSearchIndexes"
+      abstract="true">
+    <property name="description" value="Clear Elastic Search indexes."/>
+    <property name="indexPath" value="${OPAL_HOME}/data"/>
+  </bean>
+
+  <bean id="clearElasticSearchWorkspace" class="org.obiba.opal.core.upgrade.ClearElasticSearchIndexes"
+        abstract="true">
+    <property name="description" value="Clear Elastic Search workspace."/>
+  </bean>
+
+</beans>

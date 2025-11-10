@@ -1,0 +1,104 @@
+syntax = "proto2";
+
+import "Ws.proto";
+import "Opal.proto";
+import "Apps.proto";
+
+package OpalR;
+
+option java_package = "org.obiba.opal.web.model";
+
+message RProfileDto {
+  required string name = 1;
+  required bool enabled = 2;
+  required bool restrictedAccess = 3;
+}
+
+message RServerClusterDto {
+  required string name = 1;
+  repeated RServerDto servers = 2;
+}
+
+message RServerDto {
+  required string name = 1;
+  required string cluster = 2;
+  required string version = 3;
+  required bool running = 4;
+  repeated string tags = 5;
+  required int32 sessionCount = 6;
+  required int32 busySessionCount = 7;
+  required int32 cores = 8;
+  required int32 freeMemory = 9;
+  optional Apps.AppDto app = 10;
+}
+
+enum RSessionStatus {
+  WAITING = 0;
+  BUSY = 1;
+}
+
+message RSessionDto {
+  required string id = 1;
+  required string user = 2;
+  required string creationDate = 3;
+  required string lastAccessDate = 4;
+  required RSessionStatus status = 5;
+  optional string link = 6;
+  required string context = 7;
+  required string profile = 8;
+  required string cluster = 9;
+  required string server = 10;
+  required int64 currentExecutionTimeMillis = 11;
+  required int64 totalExecutionTimeMillis = 12;
+}
+
+message RPackageDto {
+  required string name = 1;
+  repeated Opal.EntryDto description = 2;
+  required string cluster = 3;
+  required string rserver = 4;
+}
+
+message RCommandDto {
+  required string id = 1;
+  required string script = 2;
+  required string status = 3;
+  required string createDate = 4;
+  required bool withResult = 5 [default = false];
+  optional string startDate = 6;
+  optional string endDate = 7;
+  optional string error = 8;
+}
+
+message RWorkspaceDto {
+  required string name = 1;
+  required string user = 2;
+  required string lastAccessDate = 3;
+  required string context = 4;
+  required int64 size = 5;
+}
+
+message RRuntimeErrorDto {
+  extend Ws.ClientErrorDto {
+    repeated RRuntimeErrorDto errors = 2001;
+  }
+}
+
+message RSessionActivityDto {
+  required string user = 1;
+  required string context = 2;
+  required string profile = 3;
+  required string createdDate = 4;
+  required string updatedDate = 5;
+  required int64 executionTimeMillis = 6;
+}
+
+message RActivitySummaryDto {
+  required string user = 1;
+  required string context = 2;
+  required string profile = 3;
+  required string startDate = 4;
+  required string endDate = 5;
+  required int64 executionTimeMillis = 6;
+  required int32 sessionsCount = 7;
+}

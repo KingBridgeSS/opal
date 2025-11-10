@@ -1,0 +1,59 @@
+syntax = "proto2";
+
+import "Magma.proto";
+
+package Database;
+
+option java_package = "org.obiba.opal.web.model";
+
+
+message JdbcDriverDto {
+  required string driverName = 1; // e.g., "MySQL 5.1"
+  required string driverClass = 2; // e.g., "com.mysql.jdbc.Driver"
+  required string jdbcUrlTemplate = 3; // e.g., "jdbc:mysql://{hostname}:{port}/{databaseName}"
+  optional string version = 4;
+  required string jdbcUrlExample = 5; // e.g., "jdbc:mysql://localhost:3306/opal"
+  repeated string supportedSchemas = 6;
+}
+
+message DatabasesStatusDto {
+  required bool hasIdentifiers = 1 [default = false];
+  required bool hasStorage = 2 [default = false];
+}
+
+message DatabaseDto {
+  enum Usage {
+    IMPORT = 0;
+    STORAGE = 1;
+    EXPORT = 2;
+  }
+  required string name = 1;
+  optional bool hasDatasource = 2 [default = false];
+  required bool defaultStorage = 3 [default = false];
+  required Usage usage = 4;
+  optional bool usedForIdentifiers = 5;
+  optional SqlSettingsDto sqlSettings = 6;
+  optional MongoDbSettingsDto mongoDbSettings = 7;
+}
+
+message SqlSettingsDto {
+  enum SqlSchema {
+    HIBERNATE = 0;
+    JDBC = 1;
+  }
+  required string url = 1; // jdbc:{mysql|postgresql}://{hostname}:{port}/{databaseName}
+  required string driverClass = 2;
+  required string username = 3;
+  optional string password = 4;
+  optional string properties = 5;
+  required SqlSchema sqlSchema = 6;
+  optional Magma.JdbcDatasourceSettingsDto jdbcDatasourceSettings = 7;
+}
+
+message MongoDbSettingsDto {
+  required string url = 1; // mongodb://{hostname}:{port}/{databaseName}
+  optional string username = 2;
+  optional string password = 3;
+  optional string properties = 4;
+  optional int32 batchSize = 5;
+}

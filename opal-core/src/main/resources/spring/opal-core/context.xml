@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+  <context:annotation-config/>
+
+  <context:component-scan base-package="org.obiba">
+    <context:exclude-filter type="regex" expression="org.obiba.opal.install"/>
+    <context:exclude-filter type="regex" expression="org.obiba.opal.upgrade"/>
+  </context:component-scan>
+
+  <import resource="tx.xml"/>
+  <import resource="version.xml"/>
+  <import resource="email.xml"/>
+
+  <bean class="org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor"/>
+
+  <bean class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+<!--  <bean id="cacheManager" class="org.springframework.cache.jcache.JCacheCacheManager">-->
+<!--    <property name="cacheManagerName" value="opal"/>-->
+<!--    <property name="configLocation" value="classpath:ehcache.xml"/>-->
+<!--    <property name="shared" value="true"/>-->
+<!--  </bean>-->
+
+</beans>

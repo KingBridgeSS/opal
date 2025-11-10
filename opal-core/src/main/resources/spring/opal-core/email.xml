@@ -1,0 +1,35 @@
+<!--
+  ~ Copyright (c) 2021 OBiBa. All rights reserved.
+  ~
+  ~ This program and the accompanying materials
+  ~ are made available under the terms of the GNU Public License v3.0.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+  <bean class="org.springframework.mail.javamail.JavaMailSenderImpl">
+    <property name="host" value="${org.obiba.opal.smtp.host}"/>
+    <property name="port" value="${org.obiba.opal.smtp.port}"/>
+    <property name="username" value="${org.obiba.opal.smtp.username}"/>
+    <property name="password" value="${org.obiba.opal.smtp.password}"/>
+    <property name="javaMailProperties">
+      <bean class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="properties">
+          <props>
+            <prop key="mail.smtp.auth">${org.obiba.opal.smtp.auth}</prop>
+            <prop key="mail.smtp.starttls.enable">${org.obiba.opal.smtp.starttls}</prop>
+            <prop key="mail.smtp.ssl.enable">${org.obiba.opal.smtp.ssl}</prop>
+            <prop key="mail.smtp.ssl.protocols">${org.obiba.opal.smtp.ssl.protocols}</prop>
+          </props>
+        </property>
+        <property name="location" value="file:${OPAL_HOME}/conf/smtp.properties"/>
+        <property name="ignoreResourceNotFound" value="true"/>
+      </bean>
+    </property>
+  </bean>
+
+</beans>
